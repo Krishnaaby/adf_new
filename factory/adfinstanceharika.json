@@ -1,0 +1,9 @@
+{
+	"name": "adfinstanceharika",
+	"location": "southindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "a0571b71-07d0-4207-9bc6-ed105a053f33",
+		"tenantId": "50c9f59a-bae0-473e-a15d-2577068ebd1c"
+	}
+}
