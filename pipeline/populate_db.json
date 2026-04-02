@@ -1,0 +1,187 @@
+{
+	"name": "populate_db",
+	"properties": {
+		"description": "populate database in azuresql with basic tables.",
+		"activities": [
+			{
+				"name": "create dim tables in db",
+				"description": "create tables in db",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "AzureSqltestdb",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "NonQuery",
+							"text": "DROP TABLE IF EXISTS [dbo].[DimProduct];\nDROP TABLE IF EXISTS [dbo].[DimProductSubcategory];\nDROP TABLE IF EXISTS [dbo].[DimProductCategory];\n\nCREATE TABLE [dbo].[DimProductCategory](\n    [ProductCategoryKey] [int] NOT NULL,\n    [ProductCategoryAlternateKey] [int] NULL,\n    [EnglishProductCategoryName] [nvarchar](50) NOT NULL,\n    [SpanishProductCategoryName] [nvarchar](50) NOT NULL,\n    [FrenchProductCategoryName] [nvarchar](50) NOT NULL\n);\n\nCREATE TABLE [dbo].[DimProductSubcategory](\n    [ProductSubcategoryKey] [int] NOT NULL,\n    [ProductSubcategoryAlternateKey] [int] NULL,\n    [EnglishProductSubcategoryName] [nvarchar](50) NOT NULL,\n    [SpanishProductSubcategoryName] [nvarchar](50) NOT NULL,\n    [FrenchProductSubcategoryName] [nvarchar](50) NOT NULL,\n    [ProductCategoryKey] [int] NULL\n);\n\nCREATE TABLE [dbo].[DimProduct](\n    [ProductKey] [int] NOT NULL,\n    [ProductAlternateKey] [nvarchar](25) NULL,\n    [ProductSubcategoryKey] [int] NULL,\n    [WeightUnitMeasureCode] [nchar](3) NULL,\n    [SizeUnitMeasureCode] [nchar](3) NULL,\n    [EnglishProductName] [nvarchar](50) NOT NULL,\n    [SpanishProductName] [nvarchar](50) NOT NULL,\n    [FrenchProductName] [nvarchar](50) NOT NULL,\n    [StandardCost] [money] NULL,\n    [FinishedGoodsFlag] [bit] NOT NULL,\n    [Color] [nvarchar](15) NOT NULL,\n    [SafetyStockLevel] [smallint] NULL,\n    [ReorderPoint] [smallint] NULL,\n    [ListPrice] [money] NULL,\n    [Size] [nvarchar](50) NULL,\n    [SizeRange] [nvarchar](50) NULL,\n    [Weight] [float] NULL,\n    [DaysToManufacture] [int] NULL,\n    [ProductLine] [nchar](2) NULL,\n    [DealerPrice] [money] NULL,\n    [Class] [nchar](2) NULL,\n    [Style] [nchar](2) NULL,\n    [ModelName] [nvarchar](50) NULL,\n    [LargePhoto] [varbinary](max) NULL,\n    [EnglishDescription] [nvarchar](400) NULL,\n    [FrenchDescription] [nvarchar](400) NULL,\n    [ChineseDescription] [nvarchar](400) NULL,\n    [ArabicDescription] [nvarchar](400) NULL,\n    [HebrewDescription] [nvarchar](400) NULL,\n    [ThaiDescription] [nvarchar](400) NULL,\n    [GermanDescription] [nvarchar](400) NULL,\n    [JapaneseDescription] [nvarchar](400) NULL,\n    [TurkishDescription] [nvarchar](400) NULL,\n    [StartDate] [datetime] NULL,\n    [EndDate] [datetime] NULL,\n    [Status] [nvarchar](7) NULL\n);"
+						}
+					],
+					"scriptBlockExecutionTimeout": "02:00:00"
+				}
+			},
+			{
+				"name": "create factinternetsales",
+				"description": "this is to call the sp that creates the factinternet sales table",
+				"type": "SqlServerStoredProcedure",
+				"dependsOn": [
+					{
+						"activity": "create dim tables in db",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"storedProcedureName": "[dbo].[factinternetsales_creator]"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureSqltestdb",
+					"type": "LinkedServiceReference"
+				}
+			},
+			{
+				"name": "ForEachfileinblob",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GetMetadatafromblob",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GetMetadatafromblob').output.childItems",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copyfromfiletotable",
+							"description": "copies the data from the corresponding table in SQL server.",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"storeSettings": {
+										"type": "AzureBlobStorageReadSettings",
+										"recursive": true,
+										"wildcardFileName": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false
+								},
+								"enableStaging": false,
+								"enableSkipIncompatibleRow": true,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": true
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "azureblobstorage",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "AzureSqlTable1",
+									"type": "DatasetReference",
+									"parameters": {
+										"tablename": {
+											"value": "@replace(item().name, '.csv', '')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "GetMetadatafromblob",
+				"description": "gets table names from azure blob storage",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "create factinternetsales",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "azureblobstorage",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			}
+		],
+		"annotations": []
+	}
+}
