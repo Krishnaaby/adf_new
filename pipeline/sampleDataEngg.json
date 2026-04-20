@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select LastLoadValue from main_control_table where sourcename = 'DimProduct'",
+						"sqlReaderQuery": "select * from main_control_table where sourcename = 'DimProduct'",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -45,7 +45,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select max(modified_date) from DimProduct;",
+						"sqlReaderQuery": "select max(modified_date) modified_date from DimProduct;",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -87,7 +87,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "concat('select * from DimProduct where modified_date >''', activity('lastloadvalue').output.firstRow.lastloadvalue,'''and modified_date <= ''',activity('latestwatermarkvalue').output.firstRow.modified_date,'''')",
+							"value": "@concat('select * from DimProduct where modified_date >''', activity('lastloadvalue').output.firstRow.lastloadvalue,''' and modified_date <= ''',activity('latestwatermarkvalue').output.firstRow.modified_date,'''')",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
