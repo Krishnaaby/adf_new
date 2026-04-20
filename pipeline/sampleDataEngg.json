@@ -126,7 +126,18 @@
 				"outputs": [
 					{
 						"referenceName": "blobparameterized",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"container": "bronze",
+							"directory": {
+								"value": "@concat(activity('lastloadvalue').output.firstRow.DestinationLocation, '/', formatDateTime(utcNow(), 'yyyy/MM/dd'))",
+								"type": "Expression"
+							},
+							"filename": {
+								"value": "@concat(activity('lastloadvalue').output.firstRow.SourceName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.csv')",
+								"type": "Expression"
+							}
+						}
 					}
 				]
 			}
