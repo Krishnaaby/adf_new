@@ -215,7 +215,7 @@
 						},
 						"ExecutionDurationSecs": {
 							"value": {
-								"value": "@activity('incrementalLoad').output.executionDuration",
+								"value": "@activity('incrementalLoad').output.copyDuration",
 								"type": "Expression"
 							},
 							"type": "Int32"
@@ -297,7 +297,7 @@
 						},
 						"ExecutionDurationSecs": {
 							"value": {
-								"value": "@activity('incrementalLoad').output.executionDuration",
+								"value": "@activity('incrementalLoad').output.copyDuration",
 								"type": "Expression"
 							},
 							"type": "Int32"
