@@ -63,6 +63,8 @@
 								"value": "@variables('watermarktime')",
 								"type": "Expression"
 							},
+							"wildcardFolderPath": "@activity('lastLoadValue').output.firstRow.SourceName",
+							"wildcardFileName": "*",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
