@@ -99,7 +99,8 @@
 							"directory": {
 								"value": "@activity('lastLoadValue').output.firstRow.SourceName",
 								"type": "Expression"
-							}
+							},
+							"filename": "*"
 						}
 					}
 				],
