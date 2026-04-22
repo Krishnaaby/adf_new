@@ -1,5 +1,5 @@
 {
-	"name": "Source_sql To Bronze",
+	"name": "Source_blob To Bronze",
 	"properties": {
 		"activities": [
 			{
@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select * from main_control_table where sourcename = 'DimProduct' and activeflag = 1",
+						"sqlReaderQuery": "select * from main_control_table where sourcename = 'FactInternetSales' and activeflag = 1",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -31,45 +31,11 @@
 				}
 			},
 			{
-				"name": "latestwatermarkvalue",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderQuery": "select max(modified_date) modified_date from DimProduct;",
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
-					},
-					"dataset": {
-						"referenceName": "AzureSqlTable1",
-						"type": "DatasetReference",
-						"parameters": {
-							"tablename": "DimProduct"
-						}
-					}
-				}
-			},
-			{
 				"name": "incrementalLoad",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "lastLoadValue",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "latestwatermarkvalue",
+						"activity": "SetWatermarkTime",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -85,13 +51,23 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "AzureSqlSource",
-						"sqlReaderQuery": {
-							"value": "@concat('select * from DimProduct where modified_date >''', activity('lastloadvalue').output.firstRow.lastloadvalue,''' and modified_date <= ''',activity('latestwatermarkvalue').output.firstRow.modified_date,'''')",
-							"type": "Expression"
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": false,
+							"modifiedDatetimeStart": {
+								"value": "@activity('lastLoadValue').output.firstRow.LastLoadValue",
+								"type": "Expression"
+							},
+							"modifiedDatetimeEnd": {
+								"value": "@variables('watermarktime')",
+								"type": "Expression"
+							},
+							"enablePartitionDiscovery": false
 						},
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
 					},
 					"sink": {
 						"type": "DelimitedTextSink",
@@ -116,10 +92,14 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AzureSqlTable1",
+						"referenceName": "blobparameterized",
 						"type": "DatasetReference",
 						"parameters": {
-							"tablename": "DimProduct"
+							"container": "source",
+							"directory": {
+								"value": "@activity('lastLoadValue').output.firstRow.SourceName",
+								"type": "Expression"
+							}
 						}
 					}
 				],
@@ -165,7 +145,7 @@
 					"storedProcedureParameters": {
 						"newwatermark": {
 							"value": {
-								"value": "@activity('latestwatermarkvalue').output.firstRow.modified_date",
+								"value": "@variables('watermarktime')",
 								"type": "Expression"
 							},
 							"type": "String"
@@ -247,7 +227,7 @@
 						},
 						"TableName": {
 							"value": {
-								"value": "@activity('lastloadvalue').output.firstRow.SourceName",
+								"value": "@activity('lastLoadValue').output.firstRow.SourceName",
 								"type": "Expression"
 							},
 							"type": "String"
@@ -329,7 +309,7 @@
 						},
 						"TableName": {
 							"value": {
-								"value": "@activity('lastloadvalue').output.firstRow.SourceName",
+								"value": "@activity('lastLoadValue').output.firstRow.SourceName",
 								"type": "Expression"
 							},
 							"type": "String"
@@ -340,8 +320,37 @@
 					"referenceName": "AzureSqltestdb",
 					"type": "LinkedServiceReference"
 				}
+			},
+			{
+				"name": "SetWatermarkTime",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "lastLoadValue",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "watermarktime",
+					"value": {
+						"value": "@utcNow()",
+						"type": "Expression"
+					}
+				}
 			}
 		],
+		"variables": {
+			"watermarktime": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }
