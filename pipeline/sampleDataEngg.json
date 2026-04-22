@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "lastloadvalue",
+				"name": "lastLoadValue",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -63,7 +63,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "lastloadvalue",
+						"activity": "lastLoadValue",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -172,7 +172,7 @@
 						},
 						"sourcename": {
 							"value": {
-								"value": "@activity('latestwatermarkvalue').output.firstRow.SourceName",
+								"value": "@activity('lastLoadValue').output.firstRow.SourceName",
 								"type": "Expression"
 							},
 							"type": "String"
