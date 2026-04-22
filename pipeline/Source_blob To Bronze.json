@@ -214,14 +214,14 @@
 						},
 						"RowsCopied": {
 							"value": {
-								"value": "@activity('incrementalLoad').output.rowsCopied",
+								"value": "@activity('incrementalLoad').output.filesWritten",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"RowsRead": {
 							"value": {
-								"value": "@activity('incrementalLoad').output.rowsRead",
+								"value": "@activity('incrementalLoad').output.filesRead",
 								"type": "Expression"
 							},
 							"type": "Int32"
@@ -296,7 +296,7 @@
 						},
 						"RowsRead": {
 							"value": {
-								"value": "@activity('incrementalLoad').output.rowsRead",
+								"value": "@activity('incrementalLoad').output.filesRead",
 								"type": "Expression"
 							},
 							"type": "Int32"
