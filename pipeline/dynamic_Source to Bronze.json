@@ -81,7 +81,10 @@
 												"typeProperties": {
 													"source": {
 														"type": "AzureSqlSource",
-														"sqlReaderQuery": "Select max(@{item().watermarkcolumn}) from @{item().SourceName}",
+														"sqlReaderQuery": {
+															"value": "Select max(@{item().watermarkcolumn}) as latest_watermark from @{item().SourceName} where activeflag = 1",
+															"type": "Expression"
+														},
 														"queryTimeout": "02:00:00",
 														"partitionOption": "None"
 													},
@@ -95,6 +98,157 @@
 															}
 														}
 													}
+												}
+											},
+											{
+												"name": "CopySqlToBronze",
+												"type": "Copy",
+												"dependsOn": [
+													{
+														"activity": "maxWatermark",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "select * from @{item().SourceLocation} \nwhere @{item().WatermarkColumn} > '@{item().LastLoadValue}' \nand @{item().WatermarkColumn} <= '@{activity('maxWatermark').output.firstRow.latest_watermark}'",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"enableStaging": false
+												},
+												"inputs": [
+													{
+														"referenceName": "AzureSqlTable1",
+														"type": "DatasetReference",
+														"parameters": {
+															"tablename": {
+																"value": "@item().SourceName",
+																"type": "Expression"
+															}
+														}
+													}
+												]
+											},
+											{
+												"name": "updatewatermark",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "CopySqlToBronze",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[dbo].[updatewatermark]",
+													"storedProcedureParameters": {
+														"newwatermark": {
+															"value": {
+																"value": "@activity('maxWatermark').output.firstRow.latest_watermark",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"sourcename": {
+															"value": {
+																"value": "@item().SourceName",
+																"type": "Expression"
+															},
+															"type": "String"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "AzureSqltestdb",
+													"type": "LinkedServiceReference"
+												}
+											},
+											{
+												"name": "updateAuditLog",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "updatewatermark",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[dbo].[InsertAuditLog]",
+													"storedProcedureParameters": {
+														"ADFPipelineRunID": {
+															"value": {
+																"value": "@activity('CopySqlToBronze').output",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"ErrorMessage": {
+															"value": "",
+															"type": "String"
+														},
+														"ExecutionDurationSecs": {
+															"value": "",
+															"type": "Int32"
+														},
+														"LoadStatus": {
+															"value": "",
+															"type": "String"
+														},
+														"PipelineName": {
+															"value": "",
+															"type": "String"
+														},
+														"RowsCopied": {
+															"value": "",
+															"type": "Int32"
+														},
+														"RowsRead": {
+															"value": "",
+															"type": "Int32"
+														},
+														"TableName": {
+															"value": "",
+															"type": "String"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "AzureSqltestdb",
+													"type": "LinkedServiceReference"
 												}
 											}
 										]
