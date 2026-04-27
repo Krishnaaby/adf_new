@@ -143,6 +143,14 @@
 														"storeSettings": {
 															"type": "AzureBlobStorageReadSettings",
 															"recursive": true,
+															"modifiedDatetimeStart": {
+																"value": "@activity('LastLoadValue').output.firstRow.LastLoadValue",
+																"type": "Expression"
+															},
+															"modifiedDatetimeEnd": {
+																"value": "@variables('currenttime')",
+																"type": "Expression"
+															},
 															"wildcardFileName": "*",
 															"enablePartitionDiscovery": false
 														},
@@ -150,7 +158,26 @@
 															"type": "DelimitedTextReadSettings"
 														}
 													},
-													"enableStaging": false
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobStorageWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".txt"
+														}
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
 												},
 												"inputs": [
 													{
@@ -162,7 +189,155 @@
 															"filename": "@''"
 														}
 													}
+												],
+												"outputs": [
+													{
+														"referenceName": "blobparameterized",
+														"type": "DatasetReference",
+														"parameters": {
+															"container": "bronze",
+															"directory": {
+																"value": "@concat(item().DestinationLocation, '/', formatDateTime(utcNow(), 'yyyy/MM/dd'))",
+																"type": "Expression"
+															},
+															"filename": {
+																"value": "@concat(activity('LastLoadValue').output.firstRow.SourceName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.csv')",
+																"type": "Expression"
+															}
+														}
+													}
 												]
+											},
+											{
+												"name": "updateWatemark",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "copyblobtobronze",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[dbo].[updatewatermark]",
+													"storedProcedureParameters": {
+														"newwatermark": {
+															"value": {
+																"value": "@variables('currenttime')",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"sourcename": {
+															"value": {
+																"value": "@item().SourceName",
+																"type": "Expression"
+															},
+															"type": "String"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "AzureSqltestdb",
+													"type": "LinkedServiceReference"
+												}
+											},
+											{
+												"name": "Stored procedure2",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": []
+											},
+											{
+												"name": "InsertAuditLog",
+												"type": "SqlServerStoredProcedure",
+												"dependsOn": [
+													{
+														"activity": "updateWatemark",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[dbo].[InsertAuditLog]",
+													"storedProcedureParameters": {
+														"ADFPipelineRunID": {
+															"value": {
+																"value": "@pipeline().RunId",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"ExecutionDurationSecs": {
+															"value": {
+																"value": "@activity('copyblobtobronze').output.copyDuration",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"LoadStatus": {
+															"value": "'Success'",
+															"type": "String"
+														},
+														"PipelineName": {
+															"value": {
+																"value": "@pipeline().Pipeline",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"RowsCopied": {
+															"value": {
+																"value": "@activity('copyblobtobronze').output.rowsCopied\r\n",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"RowsRead": {
+															"value": {
+																"value": "@activity('copyblobtobronze').output.rowsRead",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"TableName": {
+															"value": {
+																"value": "@item().SourceName",
+																"type": "Expression"
+															},
+															"type": "String"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "AzureSqltestdb",
+													"type": "LinkedServiceReference"
+												}
 											}
 										]
 									},
