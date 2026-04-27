@@ -201,7 +201,7 @@
 																"type": "Expression"
 															},
 															"filename": {
-																"value": "@concat(activity('LastLoadValue').output.firstRow.SourceName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.csv')",
+																"value": "@concat(item().DestinationLocation, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.csv')",
 																"type": "Expression"
 															}
 														}
@@ -469,7 +469,26 @@
 														"queryTimeout": "02:00:00",
 														"partitionOption": "None"
 													},
-													"enableStaging": false
+													"sink": {
+														"type": "DelimitedTextSink",
+														"storeSettings": {
+															"type": "AzureBlobStorageWriteSettings"
+														},
+														"formatSettings": {
+															"type": "DelimitedTextWriteSettings",
+															"quoteAllText": true,
+															"fileExtension": ".txt"
+														}
+													},
+													"enableStaging": false,
+													"translator": {
+														"type": "TabularTranslator",
+														"typeConversion": true,
+														"typeConversionSettings": {
+															"allowDataTruncation": true,
+															"treatBooleanAsNumber": false
+														}
+													}
 												},
 												"inputs": [
 													{
@@ -478,6 +497,23 @@
 														"parameters": {
 															"tablename": {
 																"value": "@item().SourceName",
+																"type": "Expression"
+															}
+														}
+													}
+												],
+												"outputs": [
+													{
+														"referenceName": "blobparameterized",
+														"type": "DatasetReference",
+														"parameters": {
+															"container": "bronze",
+															"directory": {
+																"value": "@concat(item().DestinationLocation, '/', formatDateTime(utcNow(), 'yyyy/MM/dd'))",
+																"type": "Expression"
+															},
+															"filename": {
+																"value": "@concat(item().SourceName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.csv')",
 																"type": "Expression"
 															}
 														}
