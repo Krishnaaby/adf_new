@@ -61,7 +61,110 @@
 								},
 								"cases": [
 									{
-										"value": "blob"
+										"value": "blob",
+										"activities": [
+											{
+												"name": "LastLoadValue",
+												"type": "Lookup",
+												"dependsOn": [],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "AzureSqlSource",
+														"sqlReaderQuery": {
+															"value": "Select max(@{item().watermarkcolumn}) as LastLoadValue from @{item().SourceName} where activeflag = 1",
+															"type": "Expression"
+														},
+														"queryTimeout": "02:00:00",
+														"partitionOption": "None"
+													},
+													"dataset": {
+														"referenceName": "AzureSqlTable1",
+														"type": "DatasetReference",
+														"parameters": {
+															"tablename": "main_control_table"
+														}
+													}
+												}
+											},
+											{
+												"name": "Setcurrenttime",
+												"type": "SetVariable",
+												"dependsOn": [
+													{
+														"activity": "LastLoadValue",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"variableName": "currenttime",
+													"value": {
+														"value": "@utcNow()",
+														"type": "Expression"
+													}
+												}
+											},
+											{
+												"name": "copyblobtobronze",
+												"type": "Copy",
+												"dependsOn": [
+													{
+														"activity": "Setcurrenttime",
+														"dependencyConditions": [
+															"Succeeded"
+														]
+													}
+												],
+												"policy": {
+													"timeout": "0.12:00:00",
+													"retry": 0,
+													"retryIntervalInSeconds": 30,
+													"secureOutput": false,
+													"secureInput": false
+												},
+												"userProperties": [],
+												"typeProperties": {
+													"source": {
+														"type": "DelimitedTextSource",
+														"storeSettings": {
+															"type": "AzureBlobStorageReadSettings",
+															"recursive": true,
+															"wildcardFileName": "*",
+															"enablePartitionDiscovery": false
+														},
+														"formatSettings": {
+															"type": "DelimitedTextReadSettings"
+														}
+													},
+													"enableStaging": false
+												},
+												"inputs": [
+													{
+														"referenceName": "blobparameterized",
+														"type": "DatasetReference",
+														"parameters": {
+															"container": "source",
+															"directory": "@item().SourceName",
+															"filename": "@''"
+														}
+													}
+												]
+											}
+										]
 									},
 									{
 										"value": "sql",
@@ -353,6 +456,11 @@
 				}
 			}
 		],
+		"variables": {
+			"currenttime": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }
