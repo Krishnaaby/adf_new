@@ -252,9 +252,16 @@
 												}
 											},
 											{
-												"name": "Stored procedure2",
+												"name": "errorLogblobtobronze",
 												"type": "SqlServerStoredProcedure",
-												"dependsOn": [],
+												"dependsOn": [
+													{
+														"activity": "copyblobtobronze",
+														"dependencyConditions": [
+															"Failed"
+														]
+													}
+												],
 												"policy": {
 													"timeout": "0.12:00:00",
 													"retry": 0,
@@ -262,7 +269,62 @@
 													"secureOutput": false,
 													"secureInput": false
 												},
-												"userProperties": []
+												"userProperties": [],
+												"typeProperties": {
+													"storedProcedureName": "[dbo].[InsertAuditLog]",
+													"storedProcedureParameters": {
+														"ADFPipelineRunID": {
+															"value": {
+																"value": "@pipeline().RunId",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"ErrorMessage": {
+															"value": {
+																"value": "@activity('copyblobtobronze').output.error.message",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"ExecutionDurationSecs": {
+															"value": {
+																"value": "@activity('copyblobtobronze').output.copyDuration",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"LoadStatus": {
+															"value": "'Error'",
+															"type": "String"
+														},
+														"PipelineName": {
+															"value": {
+																"value": "@pipeline().Pipeline",
+																"type": "Expression"
+															},
+															"type": "String"
+														},
+														"RowsRead": {
+															"value": {
+																"value": "@activity('copyblobtobronze').output.filesRead",
+																"type": "Expression"
+															},
+															"type": "Int32"
+														},
+														"TableName": {
+															"value": {
+																"value": "@item().SourceName",
+																"type": "Expression"
+															},
+															"type": "String"
+														}
+													}
+												},
+												"linkedServiceName": {
+													"referenceName": "AzureSqltestdb",
+													"type": "LinkedServiceReference"
+												}
 											},
 											{
 												"name": "InsertAuditLog",
