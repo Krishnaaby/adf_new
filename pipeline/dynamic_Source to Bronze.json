@@ -532,7 +532,7 @@
 														"parameters": {
 															"container": "bronze",
 															"directory": {
-																"value": "@concat(item().DestinationLocation, '/', formatDateTime(utcNow(), 'yyyy/MM/dd'))",
+																"value": "\n@concat(item().DestinationLocation, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'), '/run_id=', pipeline().RunId, '/')",
 																"type": "Expression"
 															},
 															"filename": {
@@ -699,7 +699,7 @@
 														},
 														"ExecutionDurationSecs": {
 															"value": {
-																"value": "@activity('CopySqlToBronze').output.copyDuration",
+																"value": "\n\n@if(equals(activity('CopySqlToBronze').Status,'Failed'),0,activity('CopySqlToBronze').output.copyDuration)",
 																"type": "Expression"
 															},
 															"type": "Int32"
@@ -717,14 +717,14 @@
 														},
 														"RowsCopied": {
 															"value": {
-																"value": "@activity('CopySqlToBronze').output.rowsCopied",
+																"value": "\n@if(equals(activity('CopySqlToBronze').Status,'Failed'),0,activity('CopySqlToBronze').output.rowsCopied)",
 																"type": "Expression"
 															},
 															"type": "Int32"
 														},
 														"RowsRead": {
 															"value": {
-																"value": "@activity('CopySqlToBronze').output.rowsRead",
+																"value": "\n@if(equals(activity('CopySqlToBronze').Status,'Failed'),0,activity('CopySqlToBronze').output.rowsRead)",
 																"type": "Expression"
 															},
 															"type": "Int32"
