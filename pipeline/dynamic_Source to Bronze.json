@@ -173,7 +173,7 @@
 														"parameters": {
 															"container": "bronze",
 															"directory": {
-																"value": "@concat(item().DestinationLocation, '/', formatDateTime(utcNow(), 'yyyy/MM/dd'))",
+																"value": "\n\n@concat(item().DestinationLocation, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'), '/run_id=', pipeline().RunId, '/')",
 																"type": "Expression"
 															},
 															"filename": {
@@ -258,14 +258,14 @@
 														},
 														"ErrorMessage": {
 															"value": {
-																"value": "@activity('copyblobtobronze').output.error.message",
+																"value": "@activity('copyblobtobronze').output.error.message\n\n",
 																"type": "Expression"
 															},
 															"type": "String"
 														},
 														"ExecutionDurationSecs": {
 															"value": {
-																"value": "@activity('copyblobtobronze').output.copyDuration",
+																"value": "\n\n@if(equals(activity('copyblobtobronze').Status,'Failed'),0,activity('copyblobtobronze').output.copyDuration)",
 																"type": "Expression"
 															},
 															"type": "Int32"
@@ -283,7 +283,7 @@
 														},
 														"RowsRead": {
 															"value": {
-																"value": "@activity('copyblobtobronze').output.filesRead",
+																"value": "\n@if(equals(activity('copyblobtobronze').Status,'Failed'),0,activity('copyblobtobronze').output.filesRead)",
 																"type": "Expression"
 															},
 															"type": "Int32"
