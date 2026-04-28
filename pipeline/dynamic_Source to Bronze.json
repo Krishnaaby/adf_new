@@ -136,11 +136,11 @@
 														"parameters": {
 															"container": "bronze",
 															"directory": {
-																"value": "@concat(item().DestinationLocation, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'), '/run_id=', pipeline().RunId, '/')",
+																"value": "@concat(item().DestinationLocation, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'), '/run_id=', pipeline().RunId)",
 																"type": "Expression"
 															},
 															"filename": {
-																"value": "@concat(item().DestinationLocation, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.csv')",
+																"value": "@concat(item().SourceName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.csv')",
 																"type": "Expression"
 															}
 														}
@@ -448,7 +448,7 @@
 														"parameters": {
 															"container": "bronze",
 															"directory": {
-																"value": "@concat(\nitem().DestinationLocation,\n'/load_date=',\nformatDateTime(utcNow(),'yyyy-MM-dd'),\n'/run_id=',\npipeline().RunId,\n'/'\n)\n",
+																"value": "@concat(\nitem().DestinationLocation,\n'/load_date=',\nformatDateTime(utcNow(),'yyyy-MM-dd'),\n'/run_id=',\npipeline().RunId\n)\n",
 																"type": "Expression"
 															},
 															"filename": {
