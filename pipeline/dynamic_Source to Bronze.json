@@ -314,14 +314,14 @@
 														},
 														"RowsCopied": {
 															"value": {
-																"value": "@activity('copyblobtobronze').output.rowsCopied\r\n",
+																"value": "@activity('copyblobtobronze').output.filesWritten\n",
 																"type": "Expression"
 															},
 															"type": "Int32"
 														},
 														"RowsRead": {
 															"value": {
-																"value": "@activity('copyblobtobronze').output.rowsRead",
+																"value": "@activity('copyblobtobronze').output.filesRead",
 																"type": "Expression"
 															},
 															"type": "Int32"
