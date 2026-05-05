@@ -1,0 +1,15 @@
+{
+	"name": "anandadfinstance1",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Enabled",
+			"editable": true
+		}
+	},
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "6c7d7c24-525e-45e9-b4b4-095bd07f10c9",
+		"tenantId": "a68dd7c3-37b8-430f-b5a4-2285b30a6668"
+	}
+}
