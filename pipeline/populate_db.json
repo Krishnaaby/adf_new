@@ -24,38 +24,10 @@
 					"scripts": [
 						{
 							"type": "NonQuery",
-							"text": "DROP TABLE IF EXISTS [dbo].[DimProduct];\nDROP TABLE IF EXISTS [dbo].[DimProductSubcategory];\nDROP TABLE IF EXISTS [dbo].[DimProductCategory];\n\nCREATE TABLE [dbo].[DimProductCategory](\n    [ProductCategoryKey] [int] NOT NULL,\n    [ProductCategoryAlternateKey] [int] NULL,\n    [EnglishProductCategoryName] [nvarchar](50) NOT NULL,\n    [SpanishProductCategoryName] [nvarchar](50) NOT NULL,\n    [FrenchProductCategoryName] [nvarchar](50) NOT NULL\n);\n\nCREATE TABLE [dbo].[DimProductSubcategory](\n    [ProductSubcategoryKey] [int] NOT NULL,\n    [ProductSubcategoryAlternateKey] [int] NULL,\n    [EnglishProductSubcategoryName] [nvarchar](50) NOT NULL,\n    [SpanishProductSubcategoryName] [nvarchar](50) NOT NULL,\n    [FrenchProductSubcategoryName] [nvarchar](50) NOT NULL,\n    [ProductCategoryKey] [int] NULL\n);\n\nCREATE TABLE [dbo].[DimProduct](\n    [ProductKey] [int] NOT NULL,\n    [ProductAlternateKey] [nvarchar](25) NULL,\n    [ProductSubcategoryKey] [int] NULL,\n    [WeightUnitMeasureCode] [nchar](3) NULL,\n    [SizeUnitMeasureCode] [nchar](3) NULL,\n    [EnglishProductName] [nvarchar](50) NOT NULL,\n    [SpanishProductName] [nvarchar](50) NOT NULL,\n    [FrenchProductName] [nvarchar](50) NOT NULL,\n    [StandardCost] [money] NULL,\n    [FinishedGoodsFlag] [bit] NOT NULL,\n    [Color] [nvarchar](15) NOT NULL,\n    [SafetyStockLevel] [smallint] NULL,\n    [ReorderPoint] [smallint] NULL,\n    [ListPrice] [money] NULL,\n    [Size] [nvarchar](50) NULL,\n    [SizeRange] [nvarchar](50) NULL,\n    [Weight] [float] NULL,\n    [DaysToManufacture] [int] NULL,\n    [ProductLine] [nchar](2) NULL,\n    [DealerPrice] [money] NULL,\n    [Class] [nchar](2) NULL,\n    [Style] [nchar](2) NULL,\n    [ModelName] [nvarchar](50) NULL,\n    [LargePhoto] [varbinary](max) NULL,\n    [EnglishDescription] [nvarchar](400) NULL,\n    [FrenchDescription] [nvarchar](400) NULL,\n    [ChineseDescription] [nvarchar](400) NULL,\n    [ArabicDescription] [nvarchar](400) NULL,\n    [HebrewDescription] [nvarchar](400) NULL,\n    [ThaiDescription] [nvarchar](400) NULL,\n    [GermanDescription] [nvarchar](400) NULL,\n    [JapaneseDescription] [nvarchar](400) NULL,\n    [TurkishDescription] [nvarchar](400) NULL,\n    [StartDate] [datetime] NULL,\n    [EndDate] [datetime] NULL,\n    [Status] [nvarchar](7) NULL\n);"
+							"text": "DROP TABLE IF EXISTS [dbo].[DimProduct];\nDROP TABLE IF EXISTS [dbo].[DimProductSubcategory];\nDROP TABLE IF EXISTS [dbo].[DimProductCategory];\ndrop table if exists [dbo].[FactInternetSales];\n\nCREATE TABLE [dbo].[DimProductCategory](\n    [ProductCategoryKey] [int] NOT NULL,\n    [ProductCategoryAlternateKey] [int] NULL,\n    [EnglishProductCategoryName] [nvarchar](50) NOT NULL,\n    [SpanishProductCategoryName] [nvarchar](50) NOT NULL,\n    [FrenchProductCategoryName] [nvarchar](50) NOT NULL\n);\n\nCREATE TABLE [dbo].[DimProductSubcategory](\n    [ProductSubcategoryKey] [int] NOT NULL,\n    [ProductSubcategoryAlternateKey] [int] NULL,\n    [EnglishProductSubcategoryName] [nvarchar](50) NOT NULL,\n    [SpanishProductSubcategoryName] [nvarchar](50) NOT NULL,\n    [FrenchProductSubcategoryName] [nvarchar](50) NOT NULL,\n    [ProductCategoryKey] [int] NULL\n);\n\nCREATE TABLE [dbo].[DimProduct](\n    [ProductKey] [int] NOT NULL,\n    [ProductAlternateKey] [nvarchar](25) NULL,\n    [ProductSubcategoryKey] [int] NULL,\n    [WeightUnitMeasureCode] [nchar](3) NULL,\n    [SizeUnitMeasureCode] [nchar](3) NULL,\n    [EnglishProductName] [nvarchar](50) NOT NULL,\n    [SpanishProductName] [nvarchar](50) NOT NULL,\n    [FrenchProductName] [nvarchar](50) NOT NULL,\n    [StandardCost] [money] NULL,\n    [FinishedGoodsFlag] [bit] NOT NULL,\n    [Color] [nvarchar](15) NOT NULL,\n    [SafetyStockLevel] [smallint] NULL,\n    [ReorderPoint] [smallint] NULL,\n    [ListPrice] [money] NULL,\n    [Size] [nvarchar](50) NULL,\n    [SizeRange] [nvarchar](50) NULL,\n    [Weight] [float] NULL,\n    [DaysToManufacture] [int] NULL,\n    [ProductLine] [nchar](2) NULL,\n    [DealerPrice] [money] NULL,\n    [Class] [nchar](2) NULL,\n    [Style] [nchar](2) NULL,\n    [ModelName] [nvarchar](50) NULL,\n    [LargePhoto] [varbinary](max) NULL,\n    [EnglishDescription] [nvarchar](400) NULL,\n    [FrenchDescription] [nvarchar](400) NULL,\n    [ChineseDescription] [nvarchar](400) NULL,\n    [ArabicDescription] [nvarchar](400) NULL,\n    [HebrewDescription] [nvarchar](400) NULL,\n    [ThaiDescription] [nvarchar](400) NULL,\n    [GermanDescription] [nvarchar](400) NULL,\n    [JapaneseDescription] [nvarchar](400) NULL,\n    [TurkishDescription] [nvarchar](400) NULL,\n    [StartDate] [datetime] NULL,\n    [EndDate] [datetime] NULL,\n    [Status] [nvarchar](7) NULL\n);\n\nCREATE TABLE dbo.FactInternetSales (\n    ProductKey INT NOT NULL,\n    OrderDateKey INT NOT NULL,\n    DueDateKey INT NOT NULL,\n    ShipDateKey INT NOT NULL,\n    CustomerKey INT NOT NULL,\n    PromotionKey INT NOT NULL,\n    CurrencyKey INT NOT NULL,\n    SalesTerritoryKey INT NOT NULL,\n    SalesOrderNumber NVARCHAR(20) NOT NULL,\n    SalesOrderLineNumber TINYINT NOT NULL,\n    RevisionNumber TINYINT NULL,\n    OrderQuantity SMALLINT NULL,\n    UnitPrice DECIMAL(19,4) NULL,\n    ExtendedAmount DECIMAL(19,4) NULL,\n    UnitPriceDiscountPct FLOAT NULL,\n    DiscountAmount DECIMAL(19,4) NULL,\n    ProductStandardCost DECIMAL(19,4) NULL,\n    TotalProductCost DECIMAL(19,4) NULL,\n    SalesAmount DECIMAL(19,4) NULL,\n    TaxAmt DECIMAL(19,4) NULL,\n    Freight DECIMAL(19,4) NULL,\n    CarrierTrackingNumber NVARCHAR(25) NULL,\n    CustomerPONumber NVARCHAR(25) NULL,\n    OrderDate DATETIME NULL,\n    DueDate DATETIME NULL,\n    ShipDate DATETIME NULL\n);"
 						}
 					],
 					"scriptBlockExecutionTimeout": "02:00:00"
-				}
-			},
-			{
-				"name": "create factinternetsales",
-				"description": "this is to call the sp that creates the factinternet sales table",
-				"type": "SqlServerStoredProcedure",
-				"dependsOn": [
-					{
-						"activity": "create dim tables in db",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"storedProcedureName": "[dbo].[factinternetsales_creator]"
-				},
-				"linkedServiceName": {
-					"referenceName": "AzureSqltestdb",
-					"type": "LinkedServiceReference"
 				}
 			},
 			{
@@ -149,7 +121,7 @@
 				"type": "GetMetadata",
 				"dependsOn": [
 					{
-						"activity": "create factinternetsales",
+						"activity": "create dim tables in db",
 						"dependencyConditions": [
 							"Succeeded"
 						]
