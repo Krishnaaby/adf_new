@@ -368,7 +368,7 @@
 													"source": {
 														"type": "AzureSqlSource",
 														"sqlReaderQuery": {
-															"value": "Select max(@{item().watermarkcolumn}) as latest_watermark from @{item().SourceName}",
+															"value": "Select max(@{item().WatermarkColumn}) as latest_watermark from @{item().SourceName}",
 															"type": "Expression"
 														},
 														"queryTimeout": "02:00:00",
