@@ -486,18 +486,18 @@
 												},
 												"userProperties": [],
 												"typeProperties": {
-													"storedProcedureName": "[dbo].[updatewatermark]",
+													"storedProcedureName": "[dbo].[UpdateWatermark]",
 													"storedProcedureParameters": {
-														"newwatermark": {
+														"ConfigID": {
 															"value": {
-																"value": "@activity('maxWatermark').output.firstRow.latest_watermark",
+																"value": "@item().ConfigID",
 																"type": "Expression"
 															},
-															"type": "String"
+															"type": "Int32"
 														},
-														"sourcename": {
+														"NewWatermark": {
 															"value": {
-																"value": "@item().SourceName",
+																"value": "@activity('maxWatermark').output.firstRow.latest_watermark",
 																"type": "Expression"
 															},
 															"type": "String"
@@ -529,7 +529,7 @@
 												},
 												"userProperties": [],
 												"typeProperties": {
-													"storedProcedureName": "[dbo].[InsertAuditLog]",
+													"storedProcedureName": "[dbo].[sp_InsertAuditLog]",
 													"storedProcedureParameters": {
 														"ADFPipelineRunID": {
 															"value": {
@@ -538,12 +538,12 @@
 															},
 															"type": "String"
 														},
-														"ExecutionDurationSecs": {
+														"ExecutionStartTime": {
 															"value": {
-																"value": "@activity('CopySqlToBronze').output.copyDuration",
+																"value": "@pipeline().TriggerTime",
 																"type": "Expression"
 															},
-															"type": "Int32"
+															"type": "DateTime"
 														},
 														"LoadStatus": {
 															"value": "'Success'",
@@ -558,7 +558,7 @@
 														},
 														"RowsCopied": {
 															"value": {
-																"value": "@activity('CopySqlToBronze').output.rowsCopied\n",
+																"value": "@activity('CopySqlToBronze').output.rowsCopied",
 																"type": "Expression"
 															},
 															"type": "Int32"
@@ -585,7 +585,7 @@
 												}
 											},
 											{
-												"name": "errorLog",
+												"name": "updateAuditLogonError",
 												"type": "SqlServerStoredProcedure",
 												"dependsOn": [
 													{
@@ -604,7 +604,7 @@
 												},
 												"userProperties": [],
 												"typeProperties": {
-													"storedProcedureName": "[dbo].[InsertAuditLog]",
+													"storedProcedureName": "[dbo].[sp_InsertAuditLog]",
 													"storedProcedureParameters": {
 														"ADFPipelineRunID": {
 															"value": {
@@ -620,15 +620,15 @@
 															},
 															"type": "String"
 														},
-														"ExecutionDurationSecs": {
+														"ExecutionStartTime": {
 															"value": {
-																"value": "@int(if(equals(activity('CopySqlToBronze').Status,'Failed'),0,activity('CopySqlToBronze').output.copyDuration))",
+																"value": "@pipeline().TriggerTime",
 																"type": "Expression"
 															},
-															"type": "Int32"
+															"type": "DateTime"
 														},
 														"LoadStatus": {
-															"value": "'Error'",
+															"value": "'Failed'",
 															"type": "String"
 														},
 														"PipelineName": {
@@ -640,14 +640,14 @@
 														},
 														"RowsCopied": {
 															"value": {
-																"value": "\n@if(equals(activity('CopySqlToBronze').Status,'Failed'),0,activity('CopySqlToBronze').output.rowsCopied)",
+																"value": "@activity('CopySqlToBronze').output.rowsCopied",
 																"type": "Expression"
 															},
 															"type": "Int32"
 														},
 														"RowsRead": {
 															"value": {
-																"value": "\n@if(equals(activity('CopySqlToBronze').Status,'Failed'),0,activity('CopySqlToBronze').output.rowsRead)",
+																"value": "@activity('CopySqlToBronze').output.rowsRead",
 																"type": "Expression"
 															},
 															"type": "Int32"
