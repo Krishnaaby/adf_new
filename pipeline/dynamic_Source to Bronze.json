@@ -136,11 +136,11 @@
 														"parameters": {
 															"container": "bronze",
 															"directory": {
-																"value": "@concat(item().TargetLocation, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'), '/run_id=', pipeline().RunId)",
+																"value": "@concat(item().TargetLocation, '/load_date=', formatDateTime(utcNow(), 'yyyy-MM-dd'))",
 																"type": "Expression"
 															},
 															"filename": {
-																"value": "@concat(item().SourceName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.csv')",
+																"value": "@concat(item().SourceName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '_', pipeline().RunId,'.csv')",
 																"type": "Expression"
 															}
 														}
@@ -455,11 +455,11 @@
 														"parameters": {
 															"container": "bronze",
 															"directory": {
-																"value": "@concat(\nitem().TargetLocation,\n'/load_date=',\nformatDateTime(utcNow(),'yyyy-MM-dd'),\n'/run_id=',\npipeline().RunId\n)\n",
+																"value": "@concat(\nitem().TargetLocation,\n'/load_date=',\nformatDateTime(utcNow(),'yyyy-MM-dd')\n)\n",
 																"type": "Expression"
 															},
 															"filename": {
-																"value": "@concat(item().SourceName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '.csv')",
+																"value": "@concat(item().SourceName, '_', formatDateTime(utcNow(), 'yyyyMMdd_HHmmss'), '_',\npipeline().RunId, '.csv')",
 																"type": "Expression"
 															}
 														}
