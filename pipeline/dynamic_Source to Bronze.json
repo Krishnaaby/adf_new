@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "AzureSqlSource",
-						"sqlReaderQuery": "Select * from main_control_table where sourcetype = 'Bronze' and targetlayer = 'Silver' and ActiveFlag = 1;",
+						"sqlReaderQuery": "Select * from main_control_table where sourcelayer = 'Bronze' and targetlayer = 'Silver' and ActiveFlag = 1;",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
